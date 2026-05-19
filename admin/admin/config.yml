@@ -1,0 +1,36 @@
+backend:
+  name: github
+  repo: juanpablobalderas/juan.pablo.balderas.portfolio
+  branch: main
+
+media_folder: "img"
+public_folder: "/img"
+
+collections:
+  - name: "proyectos"
+    label: "Proyectos"
+    folder: "_proyectos"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Título", name: "title", widget: "string" }
+      - { label: "Año", name: "year", widget: "string" }
+      - { label: "Categoría", name: "category", widget: "select", options: ["direccion", "visualizer", "fotografia"] }
+      - { label: "Rol", name: "role", widget: "string" }
+      - { label: "Cliente / Festival", name: "client", widget: "string", required: false }
+      - { label: "Imagen principal", name: "hero", widget: "image", required: false }
+      - { label: "Descripción", name: "description", widget: "text" }
+      - { label: "Galería", name: "gallery", widget: "list", field: { label: "Imagen", name: "image", widget: "image" }, required: false }
+      - { label: "Video embed (URL)", name: "video", widget: "string", required: false }
+      - { label: "PDF embed (URL)", name: "pdf", widget: "string", required: false }
+
+  - name: "about"
+    label: "About"
+    files:
+      - label: "Sobre mí"
+        name: "about"
+        file: "_data/about.yml"
+        fields:
+          - { label: "Bio", name: "bio", widget: "text" }
+          - { label: "Research Statement", name: "statement", widget: "text" }
+          - { label: "Foto", name: "photo", widget: "image", required: false }
