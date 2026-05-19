@@ -1,10 +1,883 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Content Manager</title>
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juan Pablo Balderas González de Burgos</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --white: #ffffff;
+    --black: #0a0a0a;
+    --gray: #888;
+    --light: #f5f4f0;
+    --border: #d0cfc9;
+    --font-display: 'Syne', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-display);
+    background: var(--white);
+    color: var(--black);
+    cursor: none;
+    overflow-x: hidden;
+  }
+
+  /* CUSTOM CURSOR */
+  .cursor {
+    width: 12px; height: 12px;
+    border: 1px solid var(--black);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.2s ease, width 0.2s ease, height 0.2s ease;
+    transform: translate(-50%, -50%);
+  }
+  .cursor.hovering {
+    width: 32px; height: 32px;
+    background: rgba(0,0,0,0.05);
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 2.5rem;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 0.5px solid var(--border);
+  }
+  .nav-logo {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.15em;
+    text-decoration: none; color: var(--black);
+    text-transform: uppercase;
+  }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    font-size: 11px; font-weight: 400; letter-spacing: 0.1em;
+    text-decoration: none; color: var(--gray);
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--black); }
+
+  /* SECTIONS */
+  section { min-height: 100vh; padding: 8rem 2.5rem 4rem; }
+
+  /* HOME */
+  #home {
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: flex-start;
+    min-height: 100vh;
+    padding: 0 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .home-name {
+    font-size: clamp(2rem, 5vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    max-width: 80%;
+    animation: fadeUp 1s ease forwards;
+    opacity: 0;
+  }
+
+  .home-sub {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 300;
+    color: var(--gray);
+    letter-spacing: 0.08em;
+    margin-top: 1.5rem;
+    animation: fadeUp 1s ease 0.2s forwards;
+    opacity: 0;
+  }
+
+  .home-quote {
+    font-size: clamp(0.85rem, 1.5vw, 1rem);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--gray);
+    max-width: 520px;
+    line-height: 1.6;
+    margin-top: 2rem;
+    border-left: 1px solid var(--border);
+    padding-left: 1.25rem;
+    animation: fadeUp 1s ease 0.4s forwards;
+    opacity: 0;
+  }
+
+  .home-sections {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    margin-top: 3rem;
+    animation: fadeUp 1s ease 0.6s forwards;
+    opacity: 0;
+  }
+
+  .home-section-link {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none; color: var(--black);
+    border: 0.5px solid var(--border);
+    padding: 0.6rem 1.25rem;
+    transition: all 0.25s ease;
+  }
+  .home-section-link:hover {
+    background: var(--black); color: var(--white);
+    border-color: var(--black);
+  }
+
+  /* FLOATING SCAN ELEMENTS */
+  .scan-float {
+    position: absolute;
+    border: 0.5px solid var(--border);
+    background: var(--light);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--gray);
+    text-align: center;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  .sf1 { width: 120px; height: 160px; right: 8%; top: 20%; animation: float1 8s ease-in-out infinite; }
+  .sf2 { width: 80px; height: 80px; right: 20%; top: 50%; animation: float2 10s ease-in-out infinite; }
+  .sf3 { width: 160px; height: 100px; right: 5%; bottom: 20%; animation: float3 12s ease-in-out infinite; }
+
+  @keyframes float1 {
+    0%, 100% { transform: translateY(0px) rotate(-1deg); }
+    50% { transform: translateY(-18px) rotate(0.5deg); }
+  }
+  @keyframes float2 {
+    0%, 100% { transform: translateY(0px) rotate(2deg); }
+    50% { transform: translateY(-12px) rotate(-1deg); }
+  }
+  @keyframes float3 {
+    0%, 100% { transform: translateY(0px) rotate(-0.5deg); }
+    50% { transform: translateY(-22px) rotate(1.5deg); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* WORK */
+  #work { background: var(--white); }
+
+  .section-header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 2.5rem;
+    border-bottom: 0.5px solid var(--border);
+    padding-bottom: 1rem;
+  }
+  .section-title {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .section-count {
+    font-family: var(--font-mono);
+    font-size: 10px; color: var(--gray);
+  }
+
+  /* FILTERS */
+  .filters {
+    display: flex; gap: 0.5rem; flex-wrap: wrap;
+    margin-bottom: 2.5rem;
+  }
+  .filter-btn {
+    font-size: 10px; font-weight: 500; letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: none; border: 0.5px solid var(--border);
+    padding: 0.4rem 1rem; cursor: none;
+    color: var(--gray);
+    transition: all 0.2s;
+    font-family: var(--font-display);
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--black); color: var(--white);
+    border-color: var(--black);
+  }
+
+  /* PROJECT GRID */
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 0.5px solid var(--border);
+  }
+
+  .project-card {
+    background: var(--white);
+    padding: 1.5rem;
+    cursor: none;
+    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .project-card:hover { background: var(--light); }
+  .project-card:hover .card-arrow { opacity: 1; transform: translate(2px, -2px); }
+
+  .card-img {
+    width: 100%; aspect-ratio: 4/3;
+    background: var(--light);
+    border: 0.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    position: relative;
+  }
+  .card-img img { width: 100%; height: 100%; object-fit: cover; }
+  .card-img-placeholder {
+    font-family: var(--font-mono);
+    font-size: 9px; color: var(--gray);
+    text-align: center; padding: 1rem;
+    line-height: 1.6;
+  }
+
+  .card-tag {
+    font-family: var(--font-mono);
+    font-size: 9px; color: var(--gray);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 0.35rem;
+  }
+  .card-title {
+    font-size: 1rem; font-weight: 700;
+    line-height: 1.2; margin-bottom: 0.25rem;
+  }
+  .card-year {
+    font-family: var(--font-mono);
+    font-size: 9px; color: var(--gray);
+  }
+  .card-arrow {
+    position: absolute; top: 1.5rem; right: 1.5rem;
+    font-size: 18px; opacity: 0;
+    transition: all 0.2s ease;
+  }
+
+  /* PROJECT DETAIL */
+  #project-detail {
+    display: none;
+    padding: 8rem 2.5rem 4rem;
+  }
+  #project-detail.active { display: block; }
+
+  .detail-back {
+    font-family: var(--font-mono);
+    font-size: 10px; letter-spacing: 0.08em;
+    color: var(--gray); text-decoration: none;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    margin-bottom: 3rem;
+    cursor: none;
+    transition: color 0.2s;
+  }
+  .detail-back:hover { color: var(--black); }
+
+  .detail-hero {
+    width: 100%; aspect-ratio: 16/9;
+    background: var(--light);
+    border: 0.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 2.5rem;
+    font-family: var(--font-mono);
+    font-size: 10px; color: var(--gray);
+  }
+  .detail-hero img, .detail-hero video, .detail-hero iframe {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+
+  .detail-meta {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 2rem; margin-bottom: 3rem;
+  }
+  .detail-title { font-size: clamp(1.5rem, 3vw, 2.5rem); font-weight: 800; line-height: 1.1; }
+  .detail-info { font-family: var(--font-mono); font-size: 10px; color: var(--gray); line-height: 2; margin-top: 0.5rem; }
+  .detail-desc { font-size: 0.95rem; line-height: 1.7; color: #333; }
+
+  .detail-gallery {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1px; background: var(--border);
+    border: 0.5px solid var(--border);
+    margin-top: 2.5rem;
+  }
+  .gallery-item {
+    aspect-ratio: 1;
+    background: var(--light);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 9px; color: var(--gray);
+    text-align: center; padding: 0.5rem;
+    overflow: hidden;
+  }
+  .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
+
+  .detail-embed {
+    width: 100%; aspect-ratio: 16/9;
+    background: var(--light);
+    border: 0.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+    font-family: var(--font-mono); font-size: 10px; color: var(--gray);
+    text-align: center; padding: 1rem;
+  }
+
+  .detail-nav {
+    display: flex; justify-content: space-between;
+    margin-top: 4rem; padding-top: 2rem;
+    border-top: 0.5px solid var(--border);
+  }
+  .detail-nav a {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.08em; color: var(--gray);
+    text-decoration: none; cursor: none;
+    transition: color 0.2s;
+  }
+  .detail-nav a:hover { color: var(--black); }
+
+  /* ABOUT */
+  #about { background: var(--white); }
+
+  .about-grid {
+    display: grid; grid-template-columns: 1fr 1.6fr;
+    gap: 4rem; align-items: start;
+    margin-bottom: 4rem;
+  }
+
+  .about-img {
+    aspect-ratio: 3/4;
+    background: var(--light);
+    border: 0.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 9px;
+    color: var(--gray); text-align: center; padding: 1rem;
+    animation: float1 10s ease-in-out infinite;
+    overflow: hidden;
+  }
+  .about-img img { width: 100%; height: 100%; object-fit: cover; }
+
+  .about-bio {
+    font-size: 1.05rem; line-height: 1.75;
+    margin-bottom: 2rem;
+  }
+
+  .about-divider {
+    border: none; border-top: 0.5px solid var(--border);
+    margin: 2rem 0;
+  }
+
+  .about-statement-label {
+    font-family: var(--font-mono);
+    font-size: 9px; letter-spacing: 0.1em;
+    color: var(--gray); text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+  .about-statement {
+    font-size: 0.9rem; line-height: 1.8; color: #444;
+    font-style: italic;
+    border-left: 1px solid var(--border);
+    padding-left: 1.25rem;
+  }
+
+  /* CV */
+  .cv-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 2.5rem;
+    padding-top: 3rem;
+    border-top: 0.5px solid var(--border);
+  }
+  .cv-col-title {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; margin-bottom: 1.5rem;
+  }
+  .cv-item { margin-bottom: 1.25rem; }
+  .cv-item-title { font-size: 0.85rem; font-weight: 600; line-height: 1.3; }
+  .cv-item-sub {
+    font-family: var(--font-mono);
+    font-size: 9px; color: var(--gray);
+    margin-top: 0.2rem; line-height: 1.6;
+  }
+
+  /* CONTACT */
+  #contact {
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: flex-start;
+    min-height: 80vh;
+    border-top: 0.5px solid var(--border);
+  }
+
+  .contact-email {
+    font-size: clamp(1.5rem, 4vw, 3.5rem);
+    font-weight: 800; letter-spacing: -0.02em;
+    text-decoration: none; color: var(--black);
+    cursor: none;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.3s;
+    line-height: 1.1;
+  }
+  .contact-email:hover { border-color: var(--black); }
+
+  .contact-details {
+    display: flex; gap: 2.5rem; flex-wrap: wrap;
+    margin-top: 2rem;
+  }
+  .contact-item {
+    font-family: var(--font-mono);
+    font-size: 10px; color: var(--gray);
+    letter-spacing: 0.08em;
+  }
+
+  .contact-scan {
+    margin-top: 4rem;
+    width: 180px; height: 240px;
+    background: var(--light);
+    border: 0.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 9px;
+    color: var(--gray); text-align: center; padding: 1rem;
+    animation: float2 12s ease-in-out infinite;
+    overflow: hidden;
+  }
+  .contact-scan img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* FOOTER */
+  footer {
+    padding: 1.5rem 2.5rem;
+    border-top: 0.5px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  footer span {
+    font-family: var(--font-mono);
+    font-size: 9px; color: var(--gray); letter-spacing: 0.08em;
+  }
+
+  /* GRAIN OVERLAY */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* HIDDEN */
+  .hidden { display: none !important; }
+
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.25rem; }
+    section { padding: 6rem 1.25rem 3rem; }
+    #home { padding: 0 1.25rem; }
+    .home-name { max-width: 100%; font-size: 2rem; }
+    .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .cv-grid { grid-template-columns: 1fr; }
+    .detail-meta { grid-template-columns: 1fr; gap: 1rem; }
+    .scan-float { display: none; }
+  }
+</style>
 </head>
-<body></body>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<nav>
+  <a href="#home" class="nav-logo" onclick="showSection('home')">JPBG</a>
+  <ul class="nav-links">
+    <li><a href="#work" onclick="showSection('work')">Work</a></li>
+    <li><a href="#about" onclick="showSection('about')">About</a></li>
+    <li><a href="#contact" onclick="showSection('contact')">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HOME -->
+<section id="home">
+  <div class="scan-float sf1">
+    <!-- REEMPLAZA ESTA IMAGEN:<br>sf1.jpg -->
+  </div>
+  <div class="scan-float sf2">
+    <!-- REEMPLAZA ESTA IMAGEN:<br>sf2.jpg -->
+  </div>
+  <div class="scan-float sf3">
+    <!-- REEMPLAZA ESTA IMAGEN:<br>sf3.jpg -->
+  </div>
+
+  <h1 class="home-name">Juan Pablo Balderas González de Burgos</h1>
+  <p class="home-sub">Director audiovisual &nbsp;·&nbsp; Visualizer & Researcher &nbsp;·&nbsp; Fotografía experimental</p>
+  <p class="home-quote">"Un arte auténtico en su realización, innovador en sus propuestas y humano en su diversidad."</p>
+  <div class="home-sections">
+    <a class="home-section-link" href="#work" onclick="filterWork('direccion')">Dirección audiovisual</a>
+    <a class="home-section-link" href="#work" onclick="filterWork('visualizer')">Visualizer & Researcher</a>
+    <a class="home-section-link" href="#work" onclick="filterWork('fotografia')">Fotografía experimental</a>
+  </div>
+</section>
+
+<!-- WORK -->
+<section id="work" class="hidden">
+  <div class="section-header">
+    <span class="section-title">Work</span>
+    <span class="section-count" id="work-count">— 09 projects</span>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active" onclick="filterWork('all')">Todos</button>
+    <button class="filter-btn" onclick="filterWork('direccion')">Dirección audiovisual</button>
+    <button class="filter-btn" onclick="filterWork('visualizer')">Visualizer & Researcher</button>
+    <button class="filter-btn" onclick="filterWork('fotografia')">Fotografía experimental</button>
+  </div>
+
+  <div class="project-grid" id="project-grid">
+
+    <div class="project-card" data-cat="direccion" onclick="openProject('viuda')">
+      <span class="card-arrow">↗</span>
+      <div class="card-img">
+        <!-- REEMPLAZA ESTA IMAGEN: src="img/viuda.jpg" -->
+        <div class="card-img-placeholder">REEMPLAZA<br>ESTA IMAGEN<br>viuda.jpg</div>
+      </div>
+      <div class="card-tag">Dirección audiovisual</div>
+      <div class="card-title">Viuda</div>
+      <div class="card-year">2024</div>
+    </div>
+
+    <div class="project-card" data-cat="direccion" onclick="openProject('longest')">
+      <span class="card-arrow">↗</span>
+      <div class="card-img">
+        <div class="card-img-placeholder">REEMPLAZA<br>ESTA IMAGEN<br>longest.jpg</div>
+      </div>
+      <div class="card-tag">Dirección audiovisual</div>
+      <div class="card-title">The Longest Min</div>
+      <div class="card-year">2023</div>
+    </div>
+
+    <div class="project-card" data-cat="direccion" onclick="openProject('cuerpo')">
+      <span class="card-arrow">↗</span>
+      <div class="card-img">
+        <div class="card-img-placeholder">REEMPLAZA<br>ESTA IMAGEN<br>cuerpo.jpg</div>
+      </div>
+      <div class="card-tag">Dirección audiovisual</div>
+      <div class="card-title">¿Qué es el cuerpo sin la mente?</div>
+      <div class="card-year">2024</div>
+    </div>
+
+    <div class="project-card" data-cat="direccion" onclick="openProject('mascaras')">
+      <span class="card-arrow">↗</span>
+      <div class="card-img">
+        <div class="card-img-placeholder">REEMPLAZA<br>ESTA IMAGEN<br>mascaras.jpg</div>
+      </div>
+      <div class="card-tag">Dirección audiovisual</div>
+      <div class="card-title">Fábrica de Máscaras</div>
+      <div class="card-year">2025</div>
+    </div>
+
+    <div class="project-card" data-cat="visualizer" onclick="openProject('holadenuevo')">
+      <span class="card-arrow">↗</span>
+      <div class="card-img">
+        <div class="card-img-placeholder">REEMPLAZA<br>ESTA IMAGEN<br>holadenuevo.jpg</div>
+      </div>
+      <div class="card-tag">Visualizer & Researcher</div>
+      <div class="card-title">Hola de Nuevo</div>
+      <div class="card-year">2026</div>
+    </div>
+
+    <div class="project-card" data-cat="visualizer" onclick="openProject('ruido')">
+      <span class="card-arrow">↗</span>
+      <div class="card-img">
+        <div class="card-img-placeholder">REEMPLAZA<br>ESTA IMAGEN<br>ruido.jpg</div>
+      </div>
+      <div class="card-tag">Visualizer & Researcher</div>
+      <div class="card-title">Ruido en Casa</div>
+      <div class="card-year">2026</div>
+    </div>
+
+    <div class="project-card" data-cat="fotografia" onclick="openProject('hiroshima')">
+      <span class="card-arrow">↗</span>
+      <div class="card-img">
+        <div class="card-img-placeholder">REEMPLAZA<br>ESTA IMAGEN<br>hiroshima.jpg</div>
+      </div>
+      <div class="card-tag">Fotografía experimental</div>
+      <div class="card-title">Hiroshima</div>
+      <div class="card-year">2026</div>
+    </div>
+
+    <div class="project-card" data-cat="fotografia" onclick="openProject('mbv')">
+      <span class="card-arrow">↗</span>
+      <div class="card-img">
+        <div class="card-img-placeholder">REEMPLAZA<br>ESTA IMAGEN<br>mbv.jpg</div>
+      </div>
+      <div class="card-tag">Fotografía experimental</div>
+      <div class="card-title">MBV Archive</div>
+      <div class="card-year">2026</div>
+    </div>
+
+    <div class="project-card" data-cat="fotografia" onclick="openProject('tokyo')">
+      <span class="card-arrow">↗</span>
+      <div class="card-img">
+        <div class="card-img-placeholder">REEMPLAZA<br>ESTA IMAGEN<br>tokyo.jpg</div>
+      </div>
+      <div class="card-tag">Fotografía experimental</div>
+      <div class="card-title">Seven Eleven Tokyo</div>
+      <div class="card-year">2026</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PROJECT DETAIL -->
+<div id="project-detail">
+  <a class="detail-back" href="#" onclick="closeProject()">← Back to work</a>
+
+  <div class="detail-hero" id="detail-hero">
+    <!-- REEMPLAZA: <img src="img/proyecto-hero.jpg"> o <iframe src="https://vimeo.com/..."> -->
+    REEMPLAZA ESTE HERO — imagen, video embed o still principal
+  </div>
+
+  <div class="detail-meta">
+    <div>
+      <div class="detail-title" id="detail-title">Título del proyecto</div>
+      <div class="detail-info" id="detail-info">
+        Año: —<br>
+        Rol: —<br>
+        Cliente/Festival: —
+      </div>
+    </div>
+    <div class="detail-desc" id="detail-desc">
+      <!-- REEMPLAZA: descripción conceptual del proyecto, 2–3 líneas -->
+      Descripción del proyecto. Reemplaza este texto con la descripción conceptual. 2–3 líneas, intencional no técnico.
+    </div>
+  </div>
+
+  <div class="detail-gallery" id="detail-gallery">
+    <!-- REEMPLAZA o DUPLICA estos items -->
+    <div class="gallery-item">IMAGEN 1<br><small>gallery-1.jpg</small></div>
+    <div class="gallery-item">IMAGEN 2<br><small>gallery-2.jpg</small></div>
+    <div class="gallery-item">IMAGEN 3<br><small>gallery-3.jpg</small></div>
+    <div class="gallery-item">IMAGEN 4<br><small>gallery-4.jpg</small></div>
+  </div>
+
+  <!-- Para proyectos de Visualizer: embed del PDF del pitch deck -->
+  <div class="detail-embed" id="detail-embed">
+    <!-- REEMPLAZA con: <iframe src="tu-pitch-deck.pdf" width="100%" height="100%"></iframe> -->
+    EMBED DEL PITCH DECK — reemplaza con &lt;iframe src="tu-archivo.pdf"&gt;&lt;/iframe&gt;
+  </div>
+
+  <div class="detail-nav">
+    <a href="#" onclick="prevProject()">← Proyecto anterior</a>
+    <a href="#" onclick="nextProject()">Proyecto siguiente →</a>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about" class="hidden">
+  <div class="section-header">
+    <span class="section-title">About</span>
+  </div>
+
+  <div class="about-grid">
+    <div class="about-img">
+      <!-- REEMPLAZA ESTA IMAGEN: <img src="img/about.jpg"> -->
+      REEMPLAZA<br>ESTA IMAGEN<br><small>about.jpg</small>
+    </div>
+    <div>
+      <p class="about-bio">
+        <!-- REEMPLAZA con tu bio -->
+        Mexican Creative Director with experience in experimental photography, cinematography, and editorial design. Freelance assistant director and researcher visualizer for publicity, music videos and filmmaking. My coursework focuses on new technologies to broaden the vision of culture and social life through contemporary art, fashion, and audiovisual productions. Skilled in design thinking, creative processes, and semiotic analysis.
+      </p>
+
+      <hr class="about-divider">
+
+      <div class="about-statement-label">Research Statement</div>
+      <p class="about-statement">
+        <!-- REEMPLAZA con tu research statement para MEXT -->
+        Reemplaza este texto con tu research statement. Este es el puente entre tu práctica profesional y tu propuesta académica para Keio University — donde habla La Revolución del Artesano, Are-Bure-Guritchiboke y tu pregunta de investigación sobre la percepción autoral en la era de la IA.
+      </p>
+    </div>
+  </div>
+
+  <div class="cv-grid">
+    <div>
+      <div class="cv-col-title">Experience</div>
+
+      <div class="cv-item">
+        <div class="cv-item-title">2nd AD & PA — Stink Films México</div>
+        <div class="cv-item-sub">2025 – Present</div>
+      </div>
+      <div class="cv-item">
+        <div class="cv-item-title">Researcher & Visualizer — Vondrè MV</div>
+        <div class="cv-item-sub">Hola de Nuevo · 2026</div>
+      </div>
+      <div class="cv-item">
+        <div class="cv-item-title">Researcher & Visualizer — La Bestia Music</div>
+        <div class="cv-item-sub">Ruido en Casa · 2026</div>
+      </div>
+      <div class="cv-item">
+        <div class="cv-item-title">2nd AD — Mercado Libre / Landia México</div>
+        <div class="cv-item-sub">Father's Day Commercial · 2026</div>
+      </div>
+      <div class="cv-item">
+        <div class="cv-item-title">2nd AD — Coca-Cola / Stink México</div>
+        <div class="cv-item-sub">100th Anniversary · 2025</div>
+      </div>
+      <!-- AGREGA MÁS ITEMS duplicando el bloque .cv-item -->
+    </div>
+
+    <div>
+      <div class="cv-col-title">Education</div>
+
+      <div class="cv-item">
+        <div class="cv-item-title">Bachelor's in Communication Studies</div>
+        <div class="cv-item-sub">IMESAD, Torreón · 2020–2025</div>
+      </div>
+      <div class="cv-item">
+        <div class="cv-item-title">Diploma in Film Direction</div>
+        <div class="cv-item-sub">ESCINE · 2024</div>
+      </div>
+      <div class="cv-item">
+        <div class="cv-item-title">Pro Tools Certification 101–110</div>
+        <div class="cv-item-sub">SAE Institute Mexico · 2023</div>
+      </div>
+      <div class="cv-item">
+        <div class="cv-item-title">IELTS Academic — C1 (7.0/9.0)</div>
+        <div class="cv-item-sub">2026</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="cv-col-title">Awards & Festivals</div>
+
+      <div class="cv-item">
+        <div class="cv-item-title">Grand Prix Xalapa 2023</div>
+        <div class="cv-item-sub">The Longest Min · FICM selection</div>
+      </div>
+      <div class="cv-item">
+        <div class="cv-item-title">FICG Selection</div>
+        <div class="cv-item-sub"><!-- REEMPLAZA con proyecto y año --></div>
+      </div>
+      <div class="cv-item">
+        <div class="cv-item-title">FIXILITLA Selection</div>
+        <div class="cv-item-sub"><!-- REEMPLAZA con proyecto y año --></div>
+      </div>
+      <!-- AGREGA MÁS ITEMS duplicando el bloque .cv-item -->
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="hidden">
+  <div class="section-header">
+    <span class="section-title">Contact</span>
+  </div>
+
+  <a href="mailto:jupabal21@gmail.com" class="contact-email">jupabal21@gmail.com</a>
+
+  <div class="contact-details">
+    <span class="contact-item">+52 561 523 1770</span>
+    <span class="contact-item">@juan.pablo.balderas</span>
+  </div>
+
+  <div class="contact-scan">
+    <!-- REEMPLAZA ESTA IMAGEN: <img src="img/contact-scan.jpg"> -->
+    REEMPLAZA<br>ESTA IMAGEN<br><small>contact-scan.jpg</small>
+  </div>
+</section>
+
+<footer>
+  <span>Juan Pablo Balderas González de Burgos © 2026</span>
+  <span>Mexico City</span>
+</footer>
+
+<script>
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+  });
+  document.querySelectorAll('a, button, .project-card, .home-section-link').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
+  });
+
+  const sections = ['home','work','about','contact'];
+  const projectDetail = document.getElementById('project-detail');
+
+  function showSection(id) {
+    sections.forEach(s => {
+      const el = document.getElementById(s);
+      if (el) el.classList.add('hidden');
+    });
+    projectDetail.classList.remove('active');
+    const target = document.getElementById(id);
+    if (target) target.classList.remove('hidden');
+    window.scrollTo(0, 0);
+  }
+
+  const projects = ['viuda','longest','cuerpo','mascaras','holadenuevo','ruido','hiroshima','mbv','tokyo'];
+  let currentProject = 0;
+
+  const projectData = {
+    viuda:      { title: 'Viuda', info: 'Año: 2024<br>Rol: Director / Diseñador sonoro<br>Festival: —' },
+    longest:    { title: 'The Longest Min', info: 'Año: 2023<br>Rol: Codirector / Sonidista<br>Festival: Grand Prix Xalapa 2023' },
+    cuerpo:     { title: '¿Qué es el cuerpo sin la mente?', info: 'Año: 2024<br>Rol: Director de fotografía<br>Festival: —' },
+    mascaras:   { title: 'Fábrica de Máscaras', info: 'Año: 2025<br>Rol: Creative Direction · Making of<br>Festival: —' },
+    holadenuevo:{ title: 'Hola de Nuevo', info: 'Año: 2026<br>Rol: Researcher & Visualizer<br>Cliente: Vondrè' },
+    ruido:      { title: 'Ruido en Casa', info: 'Año: 2026<br>Rol: Researcher & Visualizer<br>Cliente: La Bestia Music' },
+    hiroshima:  { title: 'Hiroshima', info: 'Año: 2026<br>Rol: Fotografía experimental<br>Técnica: Inversión analógica / escaneo' },
+    mbv:        { title: 'MBV Archive', info: 'Año: 2026<br>Rol: Archivo / Apropiación<br>Técnica: Escaneo y montaje' },
+    tokyo:      { title: 'Seven Eleven Tokyo', info: 'Año: 2026<br>Rol: Fotografía callejera<br>Técnica: Are-Bure-Boke / escaneo' },
+  };
+
+  function openProject(id) {
+    currentProject = projects.indexOf(id);
+    const data = projectData[id];
+    document.getElementById('detail-title').textContent = data.title;
+    document.getElementById('detail-info').innerHTML = data.info;
+    sections.forEach(s => {
+      const el = document.getElementById(s);
+      if (el) el.classList.add('hidden');
+    });
+    projectDetail.classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function closeProject() {
+    projectDetail.classList.remove('active');
+    showSection('work');
+  }
+
+  function prevProject() {
+    const prev = (currentProject - 1 + projects.length) % projects.length;
+    openProject(projects[prev]);
+  }
+
+  function nextProject() {
+    const next = (currentProject + 1) % projects.length;
+    openProject(projects[next]);
+  }
+
+  function filterWork(cat) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    const cards = document.querySelectorAll('.project-card');
+    let visible = 0;
+    cards.forEach(card => {
+      const match = cat === 'all' || card.dataset.cat === cat;
+      card.style.display = match ? 'block' : 'none';
+      if (match) visible++;
+    });
+    document.getElementById('work-count').textContent = `— ${String(visible).padStart(2,'0')} projects`;
+    document.querySelectorAll('.filter-btn').forEach(b => {
+      const map = { 'all':'Todos','direccion':'Dirección audiovisual','visualizer':'Visualizer & Researcher','fotografia':'Fotografía experimental' };
+      if ((cat === 'all' && b.textContent === 'Todos') || b.textContent === map[cat]) {
+        b.classList.add('active');
+      }
+    });
+    showSection('work');
+  }
+
+  showSection('home');
+</script>
+</body>
 </html>
