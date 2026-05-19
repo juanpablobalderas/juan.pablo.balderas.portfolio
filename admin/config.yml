@@ -21,13 +21,16 @@ collections:
       - label: Año
         name: year
         widget: string
-      - label: Categoria
+     - label: Categoria
         name: category
         widget: select
         options:
-          - direccion
-          - visualizer
-          - fotografia
+          - label: Direccion
+            value: direccion
+          - label: Visualizer
+            value: visualizer
+          - label: Fotografia
+            value: fotografia
       - label: Rol
         name: role
         widget: string
