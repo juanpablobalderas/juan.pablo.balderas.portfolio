@@ -381,6 +381,8 @@
   }
   .detail-media--viuda { grid-template-columns: 1fr; grid-template-rows: auto auto; }
   .detail-media--viuda .media-hero { grid-column: 1; aspect-ratio: 16/10; }
+  .detail-media--solo { grid-template-columns: 1fr; }
+.detail-media--solo .media-hero { aspect-ratio: 16/9; }
   .detail-media--viuda .media-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
 
   .detail-media--grid-4 { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; }
@@ -767,8 +769,8 @@ const directorProjects = [
     year: '2023',
     title: 'The Longest Min',
     roles: { es: 'Codirector · Sonidista', en: 'Co-director · Sound Designer' },
-    layout: 'viuda',
-    images: ['', '', '', ''],
+    layout: 'solo',
+    images: [''],
     heroEmbed: 'https://vimeo.com/854002072',
     labels: { es: ['', '', '', '—'], en: ['', '', '', '—'] },
     body: {
