@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juan Pablo Balderas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f6f6f4;
+    --paper: #ffffff;
+    --ink: #0a0a0a;
+    --muted: #5a5a5a;
+    --border: #0a0a0a;
+    --metal-top: #ffffff;
+    --metal-mid: #e2e8ee;
+    --metal-bottom: #9fadbc;
+    --metal-border: rgba(72, 88, 102, 0.42);
+    --font: 'Anonymous Pro', 'Courier New', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 13px;
+    line-height: 1.55;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Scanner grain + texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9998;
+    opacity: 0.35;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9997;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.012) 2px,
+      rgba(0,0,0,0.012) 3px
+    );
+    opacity: 0.6;
+  }
+
+  /* Page background scans (home, director, researcher, photographer) */
+  .page-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+  .page-bg-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: var(--bg);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+
+  .wrap { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 4rem; }
+
+  .page-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Pills — metallic gradient */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.45rem 1.1rem;
+    border: 1px solid var(--metal-border);
+    border-radius: 999px;
+    background: linear-gradient(
+      168deg,
+      var(--metal-top) 0%,
+      #f0f3f6 18%,
+      var(--metal-mid) 48%,
+      #c8d2dc 78%,
+      var(--metal-bottom) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.92),
+      inset 0 -1px 2px rgba(90, 108, 125, 0.14),
+      0 1px 2px rgba(0, 0, 0, 0.07);
+    font-family: var(--font);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+    cursor: pointer;
+    transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.15s ease;
+    white-space: nowrap;
+  }
+  .pill:hover {
+    background: linear-gradient(
+      168deg,
+      #ffffff 0%,
+      #e8edf2 35%,
+      #b4c0cc 72%,
+      #8a9aa8 100%
+    );
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      inset 0 -1px 3px rgba(70, 88, 105, 0.18),
+      0 2px 5px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
+  .pill.active {
+    background: linear-gradient(
+      168deg,
+      #d4dbe3 0%,
+      #a8b6c4 45%,
+      #7f92a3 100%
+    );
+    color: var(--ink);
+    box-shadow:
+      inset 0 2px 5px rgba(0, 0, 0, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 1px 2px rgba(0, 0, 0, 0.08);
+    transform: translateY(0);
+  }
+  .pill--wide { width: 100%; max-width: 100%; padding: 0.55rem 1.25rem; }
+  .pill--ghost {
+    background: linear-gradient(
+      168deg,
+      rgba(255,255,255,0.55) 0%,
+      rgba(226,232,238,0.45) 50%,
+      rgba(168,181,194,0.35) 100%
+    );
+  }
+  .pill--ghost:hover {
+    background: linear-gradient(
+      168deg,
+      #ffffff 0%,
+      #e2e8ee 50%,
+      #9fadbc 100%
+    );
+    color: var(--ink);
+  }
+
+  /* Nav */
+  header.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(246,246,244,0.9);
+    backdrop-filter: blur(6px);
+    padding: 1rem 0 0.75rem;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+  .header-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .logo {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .lang-toggle { display: flex; gap: 0.25rem; }
+  .lang-toggle .pill { min-width: 2.5rem; padding: 0.35rem 0.65rem; font-size: 10px; }
+
+  .contact-pill {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.25rem;
+    width: 100%;
+    margin-bottom: 0.75rem;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-transform: none;
+  }
+  .contact-pill a { color: inherit; text-decoration: none; }
+  .contact-pill a:hover { text-decoration: underline; }
+
+  nav.main-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    justify-content: center;
+  }
+
+  /* Sections */
+  .page { display: none; padding-top: 2rem; animation: fadeIn 0.4s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-pill {
+    margin-bottom: 1.75rem;
+    display: flex;
+    justify-content: center;
+  }
+
+  /* Home */
+  .home-hero {
+    padding: 4rem 0 3rem;
+    text-align: center;
+    min-height: 55vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .home-name {
+    font-size: clamp(1.75rem, 5vw, 3.25rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+  }
+  .home-role {
+    font-size: clamp(0.75rem, 2vw, 0.95rem);
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    max-width: 36rem;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* About — portrait, sin fondo de escaneo */
+  .about-layout {
+    display: grid;
+    grid-template-columns: minmax(200px, 280px) 1fr;
+    gap: 2rem 2.5rem;
+    align-items: start;
+    margin-bottom: 2rem;
+  }
+  .about-portrait {
+    aspect-ratio: 3 / 4;
+    border: 1px solid var(--border);
+    background: var(--paper);
+    overflow: hidden;
+    position: sticky;
+    top: 7rem;
+  }
+  .about-portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .about-portrait-placeholder {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 1rem;
+    font-size: 9px;
+    color: var(--muted);
+    line-height: 1.6;
+    letter-spacing: 0.04em;
+  }
+  .about-portrait.has-image .about-portrait-placeholder { display: none; }
+  .about-portrait.has-image img { display: block; }
+  .about-portrait img { display: none; }
+
+  .about-intro {
+    text-align: justify;
+    font-size: 12px;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem 3rem;
+  }
+  .about-col h3 {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .cv-item { margin-bottom: 1rem; }
+  .cv-item strong { display: block; font-size: 11px; font-weight: 700; }
+  .cv-item span { font-size: 10px; color: var(--muted); }
+
+  .about-contact-block { margin-top: 2.5rem; text-align: center; }
+  .about-contact-block .contact-email {
+    font-size: clamp(1rem, 3vw, 1.75rem);
+    font-weight: 700;
+    text-decoration: none;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .about-contact-block .contact-email:hover { text-decoration: underline; }
+  .about-meta { margin-top: 1rem; font-size: 10px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; }
+  .cv-download { margin-top: 1.5rem; display: flex; justify-content: center; }
+
+  /* Director index */
+  .project-list { display: flex; flex-direction: column; gap: 0.5rem; }
+  .project-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--paper);
+    text-decoration: none;
+    color: var(--ink);
+    transition: background 0.2s;
+  }
+  .project-row:hover { background: var(--bg); }
+  .project-row-title { font-weight: 700; font-size: 13px; text-transform: uppercase; }
+  .project-row-meta { font-size: 10px; color: var(--muted); margin-top: 0.2rem; }
+  .project-row-year { font-size: 11px; font-weight: 700; }
+
+  /* Director detail — photobook spread */
+  .detail-back { margin-bottom: 1.5rem; }
+  .detail-header { margin-bottom: 2rem; }
+  .detail-title {
+    font-size: clamp(1.25rem, 3vw, 2rem);
+    font-weight: 700;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.35rem;
+  }
+  .detail-roles { font-style: italic; font-size: 11px; color: var(--muted); margin-bottom: 1.25rem; }
+
+  .detail-layout {
+    display: grid;
+    grid-template-columns: minmax(240px, 1fr) minmax(280px, 1.4fr);
+    gap: 2rem;
+    align-items: start;
+  }
+  .detail-text p { margin-bottom: 1rem; text-align: justify; font-size: 12px; line-height: 1.7; }
+
+  .detail-media {
+    display: grid;
+    gap: 0.5rem;
+  }
+  .detail-media--viuda { grid-template-columns: 1fr; grid-template-rows: auto auto; }
+  .detail-media--viuda .media-hero { grid-column: 1; aspect-ratio: 16/10; }
+  .detail-media--viuda .media-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+
+  .detail-media--grid-4 { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; }
+  .detail-media--grid-4 .media-hero { grid-column: 1 / -1; aspect-ratio: 16/9; }
+  .detail-media--cuerpo { grid-template-columns: 1fr 1fr; }
+  .detail-media--cuerpo .media-hero { grid-column: 1 / -1; }
+  .detail-media--mascaras { grid-template-columns: 1.2fr 0.8fr; grid-template-rows: repeat(3, auto); }
+  .detail-media--mascaras .media-hero { grid-row: 1 / 4; grid-column: 1; min-height: 320px; }
+
+  .media-slot {
+    position: relative;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .media-slot img, .media-slot video, .media-slot iframe {
+    width: 100%; height: 100%; object-fit: cover;
+    position: absolute; inset: 0;
+  }
+  .media-placeholder {
+    font-size: 9px;
+    color: var(--muted);
+    text-align: center;
+    padding: 1rem;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+  }
+  .media-label {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(255,255,255,0.9);
+    font-size: 8px;
+    padding: 0.25rem 0.5rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-top: 1px solid var(--border);
+  }
+
+  .detail-nav-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(0,0,0,0.15);
+  }
+
+  /* Researcher — slides */
+  .deck-list { display: flex; flex-direction: column; gap: 3rem; }
+  .deck-card { background: var(--paper); border: 1px solid var(--border); padding: 1rem; }
+  .deck-card h2 {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+  }
+  .deck-card .deck-sub { font-size: 10px; color: var(--muted); margin-bottom: 1rem; font-style: italic; }
+  .deck-embed {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%;
+    background: var(--bg);
+    border: 1px solid rgba(0,0,0,0.1);
+  }
+  .deck-embed iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  /* Photographer */
+  .photo-hint {
+    text-align: center;
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+  .photo-grid {
+    column-count: 3;
+    column-gap: 0.5rem;
+  }
+  .photo-grid .photo-item {
+    break-inside: avoid;
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--border);
+    background: var(--paper);
+    overflow: hidden;
+  }
+  .photo-grid img {
+    width: 100%;
+    display: block;
+    filter: contrast(1.02);
+  }
+  .photo-empty {
+    text-align: center;
+    padding: 4rem 1rem;
+    border: 1px dashed var(--border);
+    background: var(--paper);
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  footer.site-footer {
+    margin-top: 4rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 768px) {
+    .about-layout { grid-template-columns: 1fr; }
+    .about-portrait { position: static; max-width: 280px; margin: 0 auto; }
+    .about-grid { grid-template-columns: 1fr; }
+    .detail-layout { grid-template-columns: 1fr; }
+    .detail-media--mascaras { grid-template-columns: 1fr; }
+    .detail-media--mascaras .media-hero { grid-row: auto; min-height: 200px; }
+    .photo-grid { column-count: 2; }
+    nav.main-nav { justify-content: flex-start; }
+  }
+  @media (max-width: 480px) {
+    .photo-grid { column-count: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div id="page-bg" class="page-bg" role="presentation"></div>
+<div id="page-bg-scrim" class="page-bg-scrim" role="presentation"></div>
+
+<div class="wrap">
+  <header class="site-header">
+    <div class="header-top" style="display:flex;width:100%;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.75rem;margin-bottom:0.75rem">
+      <a href="#" class="logo" onclick="go('home'); return false;">Balderas</a>
+      <div class="lang-toggle" style="display:flex;gap:0.25rem">
+        <button type="button" class="pill active" id="lang-es" onclick="setLang('es')">ES</button>
+        <button type="button" class="pill" id="lang-en" onclick="setLang('en')">EN</button>
+      </div>
+    </div>
+
+    <div class="pill pill--wide contact-pill">
+      <a href="mailto:jupabal21@gmail.com">jupabal21@gmail.com</a>
+      <span>+52 561 523 1770</span>
+      <a href="https://instagram.com/juan.pablo.balderas" target="_blank" rel="noopener">@juan.pablo.balderas</a>
+    </div>
+
+    <nav class="main-nav">
+      <button type="button" class="pill active" data-nav="home" onclick="go('home')" data-i18n="nav_home">Inicio</button>
+      <button type="button" class="pill" data-nav="about" onclick="go('about')" data-i18n="nav_about">About · Contact</button>
+      <button type="button" class="pill" data-nav="director" onclick="go('director')" data-i18n="nav_director">Director</button>
+      <button type="button" class="pill" data-nav="researcher" onclick="go('researcher')" data-i18n="nav_researcher">Researcher & Visualizer</button>
+      <button type="button" class="pill" data-nav="photographer" onclick="go('photographer')" data-i18n="nav_photographer">Photographer</button>
+    </nav>
+  </header>
+
+  <!-- HOME -->
+  <main id="page-home" class="page active">
+    <section class="home-hero">
+      <h1 class="home-name">Juan Pablo Balderas</h1>
+      <p class="home-role" data-i18n="home_role">Director, Photographer, Researcher and Visualizer</p>
+    </section>
+  </main>
+
+  <!-- ABOUT · CONTACT -->
+  <main id="page-about" class="page">
+    <div class="section-pill" style="display:flex;justify-content:center">
+      <span class="pill" data-i18n="nav_about">About · Contact</span>
+    </div>
+
+    <div class="about-layout">
+      <div class="about-portrait" id="about-portrait">
+        <img src="img/about/portrait.jpg" alt="Juan Pablo Balderas"
+          onload="document.getElementById('about-portrait').classList.add('has-image')"
+          onerror="this.style.display='none'">
+        <div class="about-portrait-placeholder" data-i18n="about_portrait_ph">
+          Añade tu foto:<br><strong>img/about/portrait.jpg</strong>
+        </div>
+      </div>
+      <div class="about-main">
+        <p class="about-intro" data-i18n="about_intro"></p>
+        <div class="about-grid">
+      <div>
+        <h3 data-i18n="cv_experience">Experience</h3>
+        <div class="cv-item"><strong>2nd AD & PA — Stink Films México</strong><span>2025 – Present</span></div>
+        <div class="cv-item"><strong>Researcher & Visualizer — Vondrè MV</strong><span>VXNDRX · 2026</span></div>
+        <div class="cv-item"><strong>Researcher & Visualizer — La Bestia Music</strong><span data-i18n="cv_ruido">Ruido en Casa · 2026</span></div>
+        <div class="cv-item"><strong>2nd AD — Mercado Libre / Landia México</strong><span data-i18n="cv_meli">Father's Day Commercial · 2026</span></div>
+        <div class="cv-item"><strong>2nd AD — Coca-Cola / Stink México</strong><span data-i18n="cv_coke">100th Anniversary · 2025</span></div>
+        <div class="cv-item"><strong data-i18n="cv_rev_title">Revolutiön 606</strong><span data-i18n="cv_rev_sub">Director · Producer · Sound Designer · 2022</span></div>
+        <div class="cv-item"><strong>Viuda</strong><span data-i18n="cv_viuda_sub">Director · Sound Designer · 2024</span></div>
+        <div class="cv-item"><strong>The Longest Min</strong><span data-i18n="cv_longest_sub">Co-director · Sound · Grand Prix Xalapa 2023</span></div>
+      </div>
+      <div>
+        <h3 data-i18n="cv_education">Education</h3>
+        <div class="cv-item"><strong data-i18n="cv_edu1_title">Bachelor's in Communication Studies</strong><span>IMESAD, Torreón · 2020–2025</span></div>
+        <div class="cv-item"><strong data-i18n="cv_edu2_title">Diploma in Film Direction</strong><span>ESCINE · 2024</span></div>
+        <div class="cv-item"><strong>Pro Tools Certification 101–110</strong><span>SAE Institute Mexico · 2023</span></div>
+        <div class="cv-item"><strong>IELTS Academic — C1 (7.0/9.0)</strong><span>2026</span></div>
+
+        <h3 style="margin-top:2rem" data-i18n="cv_awards">Awards & Festivals</h3>
+        <div class="cv-item"><strong>Grand Prix Xalapa 2023</strong><span>The Longest Min · FICM selection</span></div>
+        <div class="cv-item"><strong>FICG Selection</strong><span>—</span></div>
+        <div class="cv-item"><strong>FIXILITLA Selection</strong><span>—</span></div>
+      </div>
+    </div>
+      </div>
+    </div>
+
+    <div class="about-contact-block">
+      <a href="mailto:jupabal21@gmail.com" class="contact-email">jupabal21@gmail.com</a>
+      <div class="about-meta">
+        <span>+52 561 523 1770</span>
+        <a href="https://instagram.com/juan.pablo.balderas" target="_blank" rel="noopener">@juan.pablo.balderas</a>
+        <span>Mexico City</span>
+      </div>
+      <div class="cv-download">
+        <a class="pill" href="assets/cv-juan-pablo-balderas-2026.pdf" target="_blank" rel="noopener" data-i18n="cv_download">Download CV (PDF)</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- DIRECTOR INDEX -->
+  <main id="page-director" class="page">
+    <div class="section-pill" style="display:flex;justify-content:center">
+      <span class="pill" data-i18n="nav_director">Director</span>
+    </div>
+    <div class="project-list" id="director-list"></div>
+  </main>
+
+  <!-- DIRECTOR DETAIL -->
+  <main id="page-director-detail" class="page">
+    <button type="button" class="pill detail-back" onclick="go('director')" data-i18n="back_director">← Director</button>
+    <div id="director-detail-content"></div>
+    <div class="detail-nav-footer">
+      <button type="button" class="pill pill--ghost" onclick="directorNav(-1)" data-i18n="prev_project">← Previous</button>
+      <button type="button" class="pill pill--ghost" onclick="directorNav(1)" data-i18n="next_project">Next →</button>
+    </div>
+  </main>
+
+  <!-- RESEARCHER -->
+  <main id="page-researcher" class="page">
+    <div class="section-pill" style="display:flex;justify-content:center">
+      <span class="pill" data-i18n="nav_researcher">Researcher & Visualizer</span>
+    </div>
+    <p class="photo-hint" data-i18n="researcher_intro"></p>
+    <div class="deck-list" id="deck-list"></div>
+  </main>
+
+  <!-- PHOTOGRAPHER -->
+  <main id="page-photographer" class="page">
+    <div class="section-pill" style="display:flex;justify-content:center">
+      <span class="pill" data-i18n="nav_photographer">Photographer</span>
+    </div>
+    <p class="photo-hint" data-i18n="photo_hint"></p>
+    <div class="photo-grid" id="photo-grid"></div>
+    <div id="photo-empty" class="photo-empty hidden"></div>
+  </main>
+
+  <footer class="site-footer">
+    <span>Juan Pablo Balderas © 2026</span>
+    <span>Mexico City</span>
+  </footer>
+</div>
+
+<script>
+const LANG = { current: 'es' };
+
+const i18n = {
+  nav_home: { es: 'Inicio', en: 'Home' },
+  nav_about: { es: 'About · Contact', en: 'About · Contact' },
+  nav_director: { es: 'Director', en: 'Director' },
+  nav_researcher: { es: 'Researcher & Visualizer', en: 'Researcher & Visualizer' },
+  nav_photographer: { es: 'Photographer', en: 'Photographer' },
+  home_role: {
+    es: 'Director, Photographer, Researcher and Visualizer',
+    en: 'Director, Photographer, Researcher and Visualizer'
+  },
+  about_intro: {
+    es: 'Director creativo mexicano con experiencia en fotografía experimental, cinematografía y diseño editorial. Asistente de dirección freelance e investigador visualizer para publicidad, videoclips y cine. Mi práctica explora archivo, escaneo y montaje como diario de objetos — arte auténtico en su realización, innovador en sus propuestas y humano en su diversidad.',
+    en: 'Mexican Creative Director with experience in experimental photography, cinematography, and editorial design. Freelance assistant director and researcher visualizer for advertising, music videos, and filmmaking. My practice explores archive, scanning, and editing as a diary of objects — art authentic in its making, innovative in its proposals, and human in its diversity.'
+  },
+  cv_experience: { es: 'Experiencia', en: 'Experience' },
+  cv_education: { es: 'Educación', en: 'Education' },
+  cv_awards: { es: 'Premios y festivales', en: 'Awards & Festivals' },
+  cv_ruido: { es: 'Ruido en Casa · 2026', en: 'Ruido en Casa · 2026' },
+  cv_meli: { es: 'Comercial Día del Padre · 2026', en: "Father's Day Commercial · 2026" },
+  cv_coke: { es: '100 aniversario · 2025', en: '100th Anniversary · 2025' },
+  cv_rev_title: { es: 'Revolutiön 606', en: 'Revolutiön 606' },
+  cv_rev_sub: { es: 'Director · Productor · Diseño sonoro · 2022', en: 'Director · Producer · Sound Design · 2022' },
+  cv_viuda_sub: { es: 'Director · Diseño sonoro · 2024', en: 'Director · Sound Design · 2024' },
+  cv_longest_sub: { es: 'Codirector · Sonido · Grand Prix Xalapa 2023', en: 'Co-director · Sound · Grand Prix Xalapa 2023' },
+  cv_edu1_title: { es: 'Licenciatura en Comunicación', en: "Bachelor's in Communication Studies" },
+  cv_edu2_title: { es: 'Diplomado en Dirección de Cine', en: 'Diploma in Film Direction' },
+  cv_download: { es: 'Descargar CV (PDF)', en: 'Download CV (PDF)' },
+  back_director: { es: '← Director', en: '← Director' },
+  prev_project: { es: '← Anterior', en: '← Previous' },
+  next_project: { es: 'Siguiente →', en: 'Next →' },
+  researcher_intro: {
+    es: 'Pitch decks e investigación visual para videoclips, marcas y contextos académicos. Presentaciones en Google Slides — se actualizan al editar el archivo original.',
+    en: 'Pitch decks and visual research for music videos, brands, and academic contexts. Google Slides presentations — they update when you edit the source file.'
+  },
+  photo_hint: {
+    es: 'Galería abierta sin colecciones. Añade archivos en img/photographer/ como 001.jpg, 002.jpg, 003.png… El sitio los carga en orden automáticamente.',
+    en: 'Open gallery, no collections. Add files to img/photographer/ as 001.jpg, 002.jpg, 003.png… The site loads them in order automatically.'
+  },
+  photo_empty: {
+    es: 'Aún no hay fotos en img/photographer/.<br>Exporta tus imágenes y nómbralas 001.jpg, 002.jpg, etc.',
+    en: 'No photos in img/photographer/ yet.<br>Export your images and name them 001.jpg, 002.jpg, etc.'
+  },
+  placeholder: { es: 'Añade imagen:', en: 'Add image:' },
+  about_portrait_ph: {
+    es: 'Añade tu foto:<br><strong>img/about/portrait.jpg</strong>',
+    en: 'Add your photo:<br><strong>img/about/portrait.jpg</strong>'
+  }
+};
+
+const decks = [
+  {
+    id: 'deck-1',
+    title: { es: 'Ruido en Casa', en: 'Ruido en Casa' },
+    sub: { es: 'La Bestia Music · Researcher & Visualizer · 2026', en: 'La Bestia Music · Researcher & Visualizer · 2026' },
+    embed: 'https://docs.google.com/presentation/d/e/2PACX-1vR2rcSrd9PU8yPYPostCrYZztn4qKaVaUGGfjOP74ZhWddsUqdFAfXzaydZUgVrgcz02UvTjQaDIjpt/embed?start=true&loop=false&delayms=5000'
+  },
+  {
+    id: 'deck-2',
+    title: { es: 'Research & Visualizer', en: 'Research & Visualizer' },
+    sub: { es: 'Pitch deck · 2026', en: 'Pitch deck · 2026' },
+    embed: 'https://docs.google.com/presentation/d/e/2PACX-1vRlqJpkekpLtY_rglVdfDjuI3vfaJ-gELhV7nFXpHmwFxtMkdUJPLjftCRXHPsW4X7zHbIcSrSBYlAt/embed?start=true&loop=false&delayms=5000'
+  },
+  {
+    id: 'vxndrx',
+    title: { es: 'VXNDRX', en: 'VXNDRX' },
+    sub: { es: 'Vondrè · Researcher & Visualizer · 2026', en: 'Vondrè · Researcher & Visualizer · 2026' },
+    embed: 'https://docs.google.com/presentation/d/e/2PACX-1vRGIYFcTdBSJSF98fweusbaYV_NU-CSsi6Sr6Seg7KmigWsDsJ_DZszmZw5wQ3g5ms0zD6Ucua_01x4/embed?start=false&loop=false&delayms=5000'
+  },
+  {
+    id: 'academic',
+    title: { es: 'Porno y no porno', en: 'Porn and non-porn' },
+    sub: { es: 'Investigación académica · referencia de práctica', en: 'Academic research · practice reference' },
+    embed: 'https://docs.google.com/presentation/d/e/2PACX-1vRMoT92jC5afXDj-3KQWpJA345K9OcbYa_3NR1kkVZeJIc18dUGsfRdl9scQ2MpZqv3Oq_QbEI2h2mb/embed?start=true&loop=false&delayms=5000'
+  }
+];
+
+const directorProjects = [
+  {
+    id: 'viuda',
+    year: '2024',
+    title: 'Viuda',
+    roles: { es: 'Director · Diseñador sonoro', en: 'Director · Sound Designer' },
+    layout: 'viuda',
+    images: ['hero.jpg', 'bts1.jpg', 'bts2.jpg'],
+    heroEmbed: '', /* Google Slides pub, Vimeo, YouTube, o hero.mp4 local */
+    labels: { es: ['Toma / video', 'BTS', 'BTS'], en: ['Still / video', 'BTS', 'BTS'] },
+    body: {
+      es: [
+        'Cortometraje de ficción experimental que explora la sensación de estar atrapado en una relación tóxica, usando la metáfora de la viuda (araña) que atrapa a su presa.',
+        'La rodaje se limitó a tres horas; el proceso directivo trabajó con las actrices movimientos físicos específicos para construir la tensión entre cuerpos.',
+        'Proyecto realizado con el apoyo de la Escuela Superior de Cine (ESCINE).'
+      ],
+      en: [
+        'Experimental fiction short film exploring the feeling of being trapped in an unhealthy relationship, using the metaphor of the widow (spider) catching its prey.',
+        'The shoot was limited to three hours; direction focused on specific physical movements with the actresses to build tension between bodies.',
+        'Produced with support from ESCINE (Escuela Superior de Cine).'
+      ]
+    }
+  },
+  {
+    id: 'longest',
+    year: '2023',
+    title: 'The Longest Min',
+    roles: { es: 'Codirector · Sonidista', en: 'Co-director · Sound Designer' },
+    layout: 'grid4',
+    images: ['hero.jpg', 'still1.jpg', 'still2.jpg', 'still3.jpg'],
+    labels: { es: ['Producción', 'Pirotecnia', 'Rodaje', '—'], en: ['Production', 'Pyrotechnics', 'Shoot', '—'] },
+    body: {
+      es: [
+        'Cineminuto realizado durante el Grand Prix Mundial 2023 en Xalapa, sobre el esfuerzo y la preparación de un atleta paralímpico para una carrera de menos de un minuto.',
+        'Durante la creación de cápsulas documentales en el Grand Prix, junto con el fotógrafo Alexander Bolaño decidimos hacer un film centrado en atletismo en silla de ruedas.',
+        'Seleccionado para el festival internacional de cine de 60 segundos.'
+      ],
+      en: [
+        'One-minute film made during the 2023 World Grand Prix in Xalapa, on the effort and preparation of a Paralympic athlete for a race lasting less than a minute.',
+        'While creating documentary capsules at the Grand Prix, Alexander Bolaño and I decided to make a film focused on wheelchair track and field.',
+        'Selected for the 60 Second International Film Festival.'
+      ]
+    }
+  },
+  {
+    id: 'cuerpo',
+    year: '2024',
+    title: { es: '¿Qué es el cuerpo sin la mente?', en: 'What is the body without the mind?' },
+    roles: { es: 'Director de fotografía', en: 'Director of Photography' },
+    layout: 'cuerpo',
+    images: ['hero.jpg', 'boceto.jpg', 'referencia.jpg', 'final.jpg'],
+    labels: { es: ['Toma final', 'Boceto dibujado', 'Foto referencia', 'Toma final'], en: ['Final shot', 'Drawn sketch', 'Reference photo', 'Final shot'] },
+    body: {
+      es: [
+        'Documental sobre trastornos alimenticios. Uso conceptual de maniquíes y espejos para evitar el sesgo físico y centrar la experiencia subjetiva.',
+        'Flujo de trabajo: boceto → foto referencia → toma final. Cada etapa documenta el proceso de construcción de la imagen.'
+      ],
+      en: [
+        'Documentary on eating disorders. Conceptual use of mannequins and mirrors to avoid physical bias and center subjective experience.',
+        'Workflow: sketch → reference photo → final shot. Each stage documents the construction of the image.'
+      ]
+    }
+  },
+  {
+    id: 'mascaras',
+    year: '2025',
+    title: { es: 'Fábrica de Máscaras', en: 'Fábrica de Máscaras' },
+    roles: { es: 'Director · Productor (Making of)', en: 'Director · Producer (Making of)' },
+    layout: 'mascaras',
+    images: ['hero.jpg', 'archivo1.jpg', 'archivo2.jpg', 'archivo3.jpg'],
+    labels: { es: ['Making of', 'Archivo familiar', 'Archivo', 'Archivo'], en: ['Making of', 'Family archive', 'Archive', 'Archive'] },
+    body: {
+      es: [
+        'Autorretrato documental experimental a partir de archivos familiares destruidos y grabaciones en cámara de casete.',
+        'El making of registra el proceso de reconstrucción de memoria a través de material dañado, escaneado y reeditado.'
+      ],
+      en: [
+        'Experimental self-portrait documentary built from destroyed family archives and cassette-camera recordings.',
+        'The making of documents reconstructing memory through damaged, scanned, and re-edited material.'
+      ]
+    }
+  },
+  {
+    id: 'revolucion606',
+    year: '2022',
+    title: { es: 'Revolutiön 606', en: 'Revolutiön 606' },
+    roles: { es: 'Director · Productor · Diseñador sonoro', en: 'Director · Producer · Sound Designer' },
+    layout: 'grid4',
+    images: ['hero.jpg', 'still1.jpg', 'still2.jpg', 'still3.jpg'],
+    labels: { es: ['—', '—', '—', '—'], en: ['—', '—', '—', '—'] },
+    body: {
+      es: [
+        'Mockumental experimental sobre censura y cambios radicales individuales, basado en una entrevista ficticia sin editar con el vocalista de una banda tras un concierto.',
+        'Edición visual y sonora compleja para que el espectador se sienta cómplice del proceso: fragmentos crudos, cortes de claqueta y planos en espejo.'
+      ],
+      en: [
+        'Experimental mockumentary on censorship and radical individual change, based on a fictional unedited interview with a band vocalist after a concert.',
+        'Complex visual and sound editing so the viewer feels complicit in the process: raw fragments, clapperboard cuts, and mirror shots.'
+      ]
+    }
+  }
+];
+
+let currentDirectorIndex = 0;
+
+function t(key) {
+  const entry = i18n[key];
+  if (!entry) return key;
+  return entry[LANG.current] || entry.es;
+}
+
+function tObj(obj) {
+  if (typeof obj === 'string') return obj;
+  return obj[LANG.current] || obj.es;
+}
+
+function setLang(lang) {
+  LANG.current = lang;
+  document.documentElement.lang = lang === 'es' ? 'es' : 'en';
+  document.getElementById('lang-es').classList.toggle('active', lang === 'es');
+  document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+  const htmlKeys = ['photo_empty', 'about_portrait_ph'];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const val = i18n[key];
+    if (!val) return;
+    if (htmlKeys.includes(key)) el.innerHTML = val[lang];
+    else el.textContent = val[lang];
+  });
+  renderDirectorList();
+  if (document.getElementById('page-director-detail').classList.contains('active')) {
+    openDirector(directorProjects[currentDirectorIndex].id);
+  }
+  renderDecks();
+  const empty = document.getElementById('photo-empty');
+  if (empty && !empty.classList.contains('hidden')) empty.innerHTML = t('photo_empty');
+}
+
+const pages = ['home', 'about', 'director', 'director-detail', 'researcher', 'photographer'];
+
+/* Fondos de escaneo — solo Home y Director */
+const pageBackgrounds = {
+  home:              { image: 'img/bg/home.jpg',     opacity: 0.22, scrim: 0.84 },
+  director:          { image: 'img/bg/director.jpg', opacity: 0.2,  scrim: 0.86 },
+  'director-detail': { use: 'director' }
+};
+
+function updatePageBackground(page) {
+  const bg = document.getElementById('page-bg');
+  const scrim = document.getElementById('page-bg-scrim');
+  if (!bg || !scrim) return;
+
+  const hideBg = () => {
+    bg.classList.remove('is-visible');
+    scrim.classList.remove('is-visible');
+    bg.style.backgroundImage = '';
+    bg.style.opacity = '';
+    scrim.style.opacity = '';
+  };
+
+  if (page === 'about' || page === 'researcher' || page === 'photographer') {
+    hideBg();
+    return;
+  }
+
+  let cfg = pageBackgrounds[page];
+  if (cfg && cfg.use) cfg = pageBackgrounds[cfg.use];
+  if (!cfg || !cfg.image) {
+    hideBg();
+    return;
+  }
+
+  const img = new Image();
+  img.onload = () => {
+    bg.style.backgroundImage = `url('${cfg.image}')`;
+    bg.style.opacity = String(cfg.opacity);
+    scrim.style.opacity = String(cfg.scrim);
+    bg.classList.add('is-visible');
+    scrim.classList.add('is-visible');
+  };
+  img.onerror = () => hideBg();
+  img.src = cfg.image + '?t=' + Date.now();
+}
+
+function go(page) {
+  pages.forEach(p => {
+    const el = document.getElementById('page-' + p);
+    if (el) el.classList.remove('active');
+  });
+  const target = document.getElementById('page-' + page);
+  if (target) target.classList.add('active');
+  document.querySelectorAll('[data-nav]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.nav === page || (page === 'director-detail' && btn.dataset.nav === 'director'));
+  });
+  updatePageBackground(page);
+  window.scrollTo(0, 0);
+  if (page === 'photographer') loadPhotographer();
+}
+
+function renderDirectorList() {
+  const list = document.getElementById('director-list');
+  list.innerHTML = directorProjects.map(p => `
+    <a href="#" class="project-row" onclick="openDirector('${p.id}'); return false;">
+      <div>
+        <div class="project-row-title">${tObj(p.title)}</div>
+        <div class="project-row-meta">${tObj(p.roles)}</div>
+      </div>
+      <span class="project-row-year">${p.year}</span>
+    </a>
+  `).join('');
+}
+
+function imgPath(projectId, filename) {
+  return `img/director/${projectId}/${filename}`;
+}
+
+function toEmbedUrl(url) {
+  if (!url) return '';
+  if (url.includes('docs.google.com/presentation')) {
+    return url.replace(/\/pub(\?|$)/, '/embed$1').replace(/\/pubembed/, '/embed');
+  }
+  if (url.includes('/embed')) return url;
+  const vimeo = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
+  const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
+  return url;
+}
+
+function mediaSlot(projectId, filename, label, embedUrl) {
+  const src = imgPath(projectId, filename);
+  const labelHtml = label && label !== '—' ? `<span class="media-label">${label}</span>` : '';
+  const ph = `${t('placeholder')}<br><small>${embedUrl || src}</small>`;
+
+  if (embedUrl) {
+    return `
+    <div class="media-slot">
+      <iframe src="${toEmbedUrl(embedUrl)}" allowfullscreen loading="lazy" title="${label || ''}"></iframe>
+      ${labelHtml}
+    </div>`;
+  }
+
+  if (/\.(mp4|webm)$/i.test(filename)) {
+    return `
+    <div class="media-slot">
+      <video src="${src}" controls playsinline preload="metadata"></video>
+      <div class="media-placeholder" style="display:none">${ph}</div>
+      ${labelHtml}
+    </div>`;
+  }
+
+  return `
+    <div class="media-slot">
+      <img src="${src}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="media-placeholder" style="display:none">${ph}</div>
+      ${labelHtml}
+    </div>
+  `;
+}
+
+function heroSlot(project, filename, label) {
+  const isHero = project.images[0] === filename;
+  const embed = isHero && project.heroEmbed ? project.heroEmbed : null;
+  return mediaSlot(project.id, filename, label, embed);
+}
+
+function openDirector(id) {
+  const idx = directorProjects.findIndex(p => p.id === id);
+  if (idx < 0) return;
+  currentDirectorIndex = idx;
+  const p = directorProjects[idx];
+  const labels = p.labels[LANG.current];
+  const imgs = p.images;
+
+  let mediaHtml = '';
+  const base = `detail-media detail-media--${p.layout}`;
+
+  if (p.layout === 'viuda') {
+    mediaHtml = `
+      <div class="${base}">
+        <div class="media-hero">${heroSlot(p, imgs[0], labels[0])}</div>
+        <div class="media-row">
+          ${mediaSlot(p.id, imgs[1], labels[1])}
+          ${mediaSlot(p.id, imgs[2], labels[2])}
+        </div>
+      </div>`;
+  } else if (p.layout === 'mascaras') {
+    mediaHtml = `
+      <div class="${base}">
+        <div class="media-hero">${heroSlot(p, imgs[0], labels[0])}</div>
+        ${mediaSlot(p.id, imgs[1], labels[1])}
+        ${mediaSlot(p.id, imgs[2], labels[2])}
+        ${mediaSlot(p.id, imgs[3], labels[3])}
+      </div>`;
+  } else if (p.layout === 'cuerpo') {
+    mediaHtml = `
+      <div class="${base}">
+        ${heroSlot(p, imgs[0], labels[0])}
+        ${mediaSlot(p.id, imgs[1], labels[1])}
+        ${mediaSlot(p.id, imgs[2], labels[2])}
+        ${mediaSlot(p.id, imgs[3], labels[3])}
+      </div>`;
+  } else {
+    mediaHtml = `
+      <div class="${base}">
+        <div class="media-hero">${heroSlot(p, imgs[0], labels[0])}</div>
+        ${mediaSlot(p.id, imgs[1], labels[1])}
+        ${mediaSlot(p.id, imgs[2], labels[2])}
+        ${imgs[3] ? mediaSlot(p.id, imgs[3], labels[3]) : ''}
+      </div>`;
+  }
+
+  const bodyHtml = p.body[LANG.current].map(par => `<p>${par}</p>`).join('');
+
+  document.getElementById('director-detail-content').innerHTML = `
+    <header class="detail-header">
+      <h1 class="detail-title">${tObj(p.title)} — ${p.year}</h1>
+      <p class="detail-roles">${tObj(p.roles)}</p>
+    </header>
+    <div class="detail-layout">
+      <div class="detail-text">${bodyHtml}</div>
+      <div>${mediaHtml}</div>
+    </div>
+  `;
+  go('director-detail');
+}
+
+function directorNav(dir) {
+  currentDirectorIndex = (currentDirectorIndex + dir + directorProjects.length) % directorProjects.length;
+  openDirector(directorProjects[currentDirectorIndex].id);
+}
+
+function renderDecks() {
+  document.getElementById('deck-list').innerHTML = decks.map(d => `
+    <article class="deck-card" id="${d.id}">
+      <h2>${tObj(d.title)}</h2>
+      <p class="deck-sub">${tObj(d.sub)}</p>
+      <div class="deck-embed">
+        <iframe src="${d.embed}" allowfullscreen loading="lazy" title="${tObj(d.title)}"></iframe>
+      </div>
+    </article>
+  `).join('');
+}
+
+function imageExists(src) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = src + '?t=' + Date.now();
+  });
+}
+
+async function loadPhotographer() {
+  const grid = document.getElementById('photo-grid');
+  const empty = document.getElementById('photo-empty');
+  grid.innerHTML = '';
+  const exts = ['jpg', 'jpeg', 'png', 'webp'];
+  let count = 0;
+
+  for (let i = 1; i <= 400; i++) {
+    const num = String(i).padStart(3, '0');
+    for (const ext of exts) {
+      const src = `img/photographer/${num}.${ext}`;
+      if (await imageExists(src)) {
+        const item = document.createElement('div');
+        item.className = 'photo-item';
+        item.innerHTML = `<img src="${src}" alt="" loading="lazy">`;
+        grid.appendChild(item);
+        count++;
+        break;
+      }
+    }
+  }
+
+  if (count === 0) {
+    empty.classList.remove('hidden');
+    empty.innerHTML = t('photo_empty');
+  } else {
+    empty.classList.add('hidden');
+  }
+}
+
+renderDirectorList();
+renderDecks();
+setLang('es');
+updatePageBackground('home');
+</script>
+</body>
+</html>
