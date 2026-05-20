@@ -13,7 +13,10 @@
     --ink: #0a0a0a;
     --muted: #5a5a5a;
     --border: #0a0a0a;
-    --pill-bg: rgba(255,255,255,0.85);
+    --metal-top: #ffffff;
+    --metal-mid: #e2e8ee;
+    --metal-bottom: #9fadbc;
+    --metal-border: rgba(72, 88, 102, 0.42);
     --font: 'Anonymous Pro', 'Courier New', monospace;
   }
 
@@ -57,18 +60,56 @@
     opacity: 0.6;
   }
 
+  /* Page background scans (home, director, researcher, photographer) */
+  .page-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+  .page-bg-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: var(--bg);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+
   .wrap { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 4rem; }
 
-  /* Pills */
+  .page-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Pills — metallic gradient */
   .pill {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.35rem;
     padding: 0.45rem 1.1rem;
-    border: 1px solid var(--border);
+    border: 1px solid var(--metal-border);
     border-radius: 999px;
-    background: var(--pill-bg);
+    background: linear-gradient(
+      168deg,
+      var(--metal-top) 0%,
+      #f0f3f6 18%,
+      var(--metal-mid) 48%,
+      #c8d2dc 78%,
+      var(--metal-bottom) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.92),
+      inset 0 -1px 2px rgba(90, 108, 125, 0.14),
+      0 1px 2px rgba(0, 0, 0, 0.07);
     font-family: var(--font);
     font-size: 11px;
     font-weight: 700;
@@ -76,18 +117,57 @@
     text-transform: uppercase;
     text-decoration: none;
     color: var(--ink);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
     cursor: pointer;
-    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.15s ease;
     white-space: nowrap;
   }
-  .pill:hover, .pill.active {
-    background: var(--ink);
-    color: var(--paper);
-    box-shadow: 0 0 0 1px var(--ink), 2px 2px 0 rgba(0,0,0,0.15);
+  .pill:hover {
+    background: linear-gradient(
+      168deg,
+      #ffffff 0%,
+      #e8edf2 35%,
+      #b4c0cc 72%,
+      #8a9aa8 100%
+    );
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      inset 0 -1px 3px rgba(70, 88, 105, 0.18),
+      0 2px 5px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
+  .pill.active {
+    background: linear-gradient(
+      168deg,
+      #d4dbe3 0%,
+      #a8b6c4 45%,
+      #7f92a3 100%
+    );
+    color: var(--ink);
+    box-shadow:
+      inset 0 2px 5px rgba(0, 0, 0, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 1px 2px rgba(0, 0, 0, 0.08);
+    transform: translateY(0);
   }
   .pill--wide { width: 100%; max-width: 100%; padding: 0.55rem 1.25rem; }
-  .pill--ghost { background: transparent; }
-  .pill--ghost:hover { background: var(--ink); color: var(--paper); }
+  .pill--ghost {
+    background: linear-gradient(
+      168deg,
+      rgba(255,255,255,0.55) 0%,
+      rgba(226,232,238,0.45) 50%,
+      rgba(168,181,194,0.35) 100%
+    );
+  }
+  .pill--ghost:hover {
+    background: linear-gradient(
+      168deg,
+      #ffffff 0%,
+      #e2e8ee 50%,
+      #9fadbc 100%
+    );
+    color: var(--ink);
+  }
 
   /* Nav */
   header.site-header {
@@ -155,7 +235,14 @@
   }
 
   /* Home */
-  .home-hero { padding: 3rem 0 2rem; text-align: center; }
+  .home-hero {
+    padding: 4rem 0 3rem;
+    text-align: center;
+    min-height: 55vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
   .home-name {
     font-size: clamp(1.75rem, 5vw, 3.25rem);
     font-weight: 700;
@@ -169,24 +256,58 @@
     color: var(--muted);
     letter-spacing: 0.04em;
     max-width: 36rem;
-    margin: 0 auto 2.5rem;
+    margin: 0 auto;
     line-height: 1.6;
   }
-  .home-nav { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
 
-  /* About */
+  /* About — portrait, sin fondo de escaneo */
+  .about-layout {
+    display: grid;
+    grid-template-columns: minmax(200px, 280px) 1fr;
+    gap: 2rem 2.5rem;
+    align-items: start;
+    margin-bottom: 2rem;
+  }
+  .about-portrait {
+    aspect-ratio: 3 / 4;
+    border: 1px solid var(--border);
+    background: var(--paper);
+    overflow: hidden;
+    position: sticky;
+    top: 7rem;
+  }
+  .about-portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .about-portrait-placeholder {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 1rem;
+    font-size: 9px;
+    color: var(--muted);
+    line-height: 1.6;
+    letter-spacing: 0.04em;
+  }
+  .about-portrait.has-image .about-portrait-placeholder { display: none; }
+  .about-portrait.has-image img { display: block; }
+  .about-portrait img { display: none; }
+
   .about-intro {
-    max-width: 42rem;
-    margin: 0 auto 2rem;
     text-align: justify;
     font-size: 12px;
     line-height: 1.7;
+    margin-bottom: 1.5rem;
   }
   .about-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2rem 3rem;
-    margin-top: 2rem;
   }
   .about-col h3 {
     font-size: 10px;
@@ -386,6 +507,8 @@
   .hidden { display: none !important; }
 
   @media (max-width: 768px) {
+    .about-layout { grid-template-columns: 1fr; }
+    .about-portrait { position: static; max-width: 280px; margin: 0 auto; }
     .about-grid { grid-template-columns: 1fr; }
     .detail-layout { grid-template-columns: 1fr; }
     .detail-media--mascaras { grid-template-columns: 1fr; }
@@ -400,10 +523,13 @@
 </head>
 <body>
 
+<div id="page-bg" class="page-bg" role="presentation"></div>
+<div id="page-bg-scrim" class="page-bg-scrim" role="presentation"></div>
+
 <div class="wrap">
   <header class="site-header">
     <div class="header-top" style="display:flex;width:100%;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.75rem;margin-bottom:0.75rem">
-      <a href="#" class="logo" onclick="go('home'); return false;">JP · Balderas</a>
+      <a href="#" class="logo" onclick="go('home'); return false;">Balderas</a>
       <div class="lang-toggle" style="display:flex;gap:0.25rem">
         <button type="button" class="pill active" id="lang-es" onclick="setLang('es')">ES</button>
         <button type="button" class="pill" id="lang-en" onclick="setLang('en')">EN</button>
@@ -430,12 +556,6 @@
     <section class="home-hero">
       <h1 class="home-name">Juan Pablo Balderas</h1>
       <p class="home-role" data-i18n="home_role">Director, Photographer, Researcher and Visualizer</p>
-      <div class="home-nav" style="display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center">
-        <button type="button" class="pill" onclick="go('director')" data-i18n="nav_director">Director</button>
-        <button type="button" class="pill" onclick="go('researcher')" data-i18n="nav_researcher">Researcher & Visualizer</button>
-        <button type="button" class="pill" onclick="go('photographer')" data-i18n="nav_photographer">Photographer</button>
-        <button type="button" class="pill pill--ghost" onclick="go('about')" data-i18n="nav_about">About · Contact</button>
-      </div>
     </section>
   </main>
 
@@ -445,9 +565,18 @@
       <span class="pill" data-i18n="nav_about">About · Contact</span>
     </div>
 
-    <p class="about-intro" data-i18n="about_intro"></p>
-
-    <div class="about-grid">
+    <div class="about-layout">
+      <div class="about-portrait" id="about-portrait">
+        <img src="img/about/portrait.jpg" alt="Juan Pablo Balderas"
+          onload="document.getElementById('about-portrait').classList.add('has-image')"
+          onerror="this.style.display='none'">
+        <div class="about-portrait-placeholder" data-i18n="about_portrait_ph">
+          Añade tu foto:<br><strong>img/about/portrait.jpg</strong>
+        </div>
+      </div>
+      <div class="about-main">
+        <p class="about-intro" data-i18n="about_intro"></p>
+        <div class="about-grid">
       <div>
         <h3 data-i18n="cv_experience">Experience</h3>
         <div class="cv-item"><strong>2nd AD & PA — Stink Films México</strong><span>2025 – Present</span></div>
@@ -470,6 +599,8 @@
         <div class="cv-item"><strong>Grand Prix Xalapa 2023</strong><span>The Longest Min · FICM selection</span></div>
         <div class="cv-item"><strong>FICG Selection</strong><span>—</span></div>
         <div class="cv-item"><strong>FIXILITLA Selection</strong><span>—</span></div>
+      </div>
+    </div>
       </div>
     </div>
 
@@ -574,7 +705,11 @@ const i18n = {
     es: 'Aún no hay fotos en img/photographer/.<br>Exporta tus imágenes y nómbralas 001.jpg, 002.jpg, etc.',
     en: 'No photos in img/photographer/ yet.<br>Export your images and name them 001.jpg, 002.jpg, etc.'
   },
-  placeholder: { es: 'Añade imagen:', en: 'Add image:' }
+  placeholder: { es: 'Añade imagen:', en: 'Add image:' },
+  about_portrait_ph: {
+    es: 'Añade tu foto:<br><strong>img/about/portrait.jpg</strong>',
+    en: 'Add your photo:<br><strong>img/about/portrait.jpg</strong>'
+  }
 };
 
 const decks = [
@@ -612,6 +747,7 @@ const directorProjects = [
     roles: { es: 'Director · Diseñador sonoro', en: 'Director · Sound Designer' },
     layout: 'viuda',
     images: ['hero.jpg', 'bts1.jpg', 'bts2.jpg'],
+    heroEmbed: '', /* Google Slides pub, Vimeo, YouTube, o hero.mp4 local */
     labels: { es: ['Toma / video', 'BTS', 'BTS'], en: ['Still / video', 'BTS', 'BTS'] },
     body: {
       es: [
@@ -724,10 +860,13 @@ function setLang(lang) {
   document.documentElement.lang = lang === 'es' ? 'es' : 'en';
   document.getElementById('lang-es').classList.toggle('active', lang === 'es');
   document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+  const htmlKeys = ['photo_empty', 'about_portrait_ph'];
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     const val = i18n[key];
-    if (val) el.textContent = val[lang];
+    if (!val) return;
+    if (htmlKeys.includes(key)) el.innerHTML = val[lang];
+    else el.textContent = val[lang];
   });
   renderDirectorList();
   if (document.getElementById('page-director-detail').classList.contains('active')) {
@@ -740,6 +879,50 @@ function setLang(lang) {
 
 const pages = ['home', 'about', 'director', 'director-detail', 'researcher', 'photographer'];
 
+/* Fondos de escaneo — solo Home y Director */
+const pageBackgrounds = {
+  home:              { image: 'img/bg/home.jpg',     opacity: 0.50, scrim: 0.84 },
+  director:          { image: 'img/bg/director.jpg', opacity: 0.20,  scrim: 0.86 },
+  'director-detail': { use: 'director' }
+};
+
+function updatePageBackground(page) {
+  const bg = document.getElementById('page-bg');
+  const scrim = document.getElementById('page-bg-scrim');
+  if (!bg || !scrim) return;
+
+  const hideBg = () => {
+    bg.classList.remove('is-visible');
+    scrim.classList.remove('is-visible');
+    bg.style.backgroundImage = '';
+    bg.style.opacity = '';
+    scrim.style.opacity = '';
+  };
+
+  if (page === 'about' || page === 'researcher' || page === 'photographer') {
+    hideBg();
+    return;
+  }
+
+  let cfg = pageBackgrounds[page];
+  if (cfg && cfg.use) cfg = pageBackgrounds[cfg.use];
+  if (!cfg || !cfg.image) {
+    hideBg();
+    return;
+  }
+
+  const img = new Image();
+  img.onload = () => {
+    bg.style.backgroundImage = `url('${cfg.image}')`;
+    bg.style.opacity = String(cfg.opacity);
+    scrim.style.opacity = String(cfg.scrim);
+    bg.classList.add('is-visible');
+    scrim.classList.add('is-visible');
+  };
+  img.onerror = () => hideBg();
+  img.src = cfg.image + '?t=' + Date.now();
+}
+
 function go(page) {
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
@@ -750,6 +933,7 @@ function go(page) {
   document.querySelectorAll('[data-nav]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.nav === page || (page === 'director-detail' && btn.dataset.nav === 'director'));
   });
+  updatePageBackground(page);
   window.scrollTo(0, 0);
   if (page === 'photographer') loadPhotographer();
 }
@@ -771,16 +955,54 @@ function imgPath(projectId, filename) {
   return `img/director/${projectId}/${filename}`;
 }
 
-function mediaSlot(projectId, filename, label) {
+function toEmbedUrl(url) {
+  if (!url) return '';
+  if (url.includes('docs.google.com/presentation')) {
+    return url.replace(/\/pub(\?|$)/, '/embed$1').replace(/\/pubembed/, '/embed');
+  }
+  if (url.includes('/embed')) return url;
+  const vimeo = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
+  const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
+  return url;
+}
+
+function mediaSlot(projectId, filename, label, embedUrl) {
   const src = imgPath(projectId, filename);
-  const ph = `${t('placeholder')}<br><small>${src}</small>`;
+  const labelHtml = label && label !== '—' ? `<span class="media-label">${label}</span>` : '';
+  const ph = `${t('placeholder')}<br><small>${embedUrl || src}</small>`;
+
+  if (embedUrl) {
+    return `
+    <div class="media-slot">
+      <iframe src="${toEmbedUrl(embedUrl)}" allowfullscreen loading="lazy" title="${label || ''}"></iframe>
+      ${labelHtml}
+    </div>`;
+  }
+
+  if (/\.(mp4|webm)$/i.test(filename)) {
+    return `
+    <div class="media-slot">
+      <video src="${src}" controls playsinline preload="metadata"></video>
+      <div class="media-placeholder" style="display:none">${ph}</div>
+      ${labelHtml}
+    </div>`;
+  }
+
   return `
     <div class="media-slot">
       <img src="${src}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="media-placeholder" style="display:none">${ph}</div>
-      ${label && label !== '—' ? `<span class="media-label">${label}</span>` : ''}
+      ${labelHtml}
     </div>
   `;
+}
+
+function heroSlot(project, filename, label) {
+  const isHero = project.images[0] === filename;
+  const embed = isHero && project.heroEmbed ? project.heroEmbed : null;
+  return mediaSlot(project.id, filename, label, embed);
 }
 
 function openDirector(id) {
@@ -797,7 +1019,7 @@ function openDirector(id) {
   if (p.layout === 'viuda') {
     mediaHtml = `
       <div class="${base}">
-        <div class="media-hero">${mediaSlot(p.id, imgs[0], labels[0])}</div>
+        <div class="media-hero">${heroSlot(p, imgs[0], labels[0])}</div>
         <div class="media-row">
           ${mediaSlot(p.id, imgs[1], labels[1])}
           ${mediaSlot(p.id, imgs[2], labels[2])}
@@ -806,7 +1028,7 @@ function openDirector(id) {
   } else if (p.layout === 'mascaras') {
     mediaHtml = `
       <div class="${base}">
-        <div class="media-hero">${mediaSlot(p.id, imgs[0], labels[0])}</div>
+        <div class="media-hero">${heroSlot(p, imgs[0], labels[0])}</div>
         ${mediaSlot(p.id, imgs[1], labels[1])}
         ${mediaSlot(p.id, imgs[2], labels[2])}
         ${mediaSlot(p.id, imgs[3], labels[3])}
@@ -814,7 +1036,7 @@ function openDirector(id) {
   } else if (p.layout === 'cuerpo') {
     mediaHtml = `
       <div class="${base}">
-        ${mediaSlot(p.id, imgs[0], labels[0])}
+        ${heroSlot(p, imgs[0], labels[0])}
         ${mediaSlot(p.id, imgs[1], labels[1])}
         ${mediaSlot(p.id, imgs[2], labels[2])}
         ${mediaSlot(p.id, imgs[3], labels[3])}
@@ -822,7 +1044,7 @@ function openDirector(id) {
   } else {
     mediaHtml = `
       <div class="${base}">
-        <div class="media-hero">${mediaSlot(p.id, imgs[0], labels[0])}</div>
+        <div class="media-hero">${heroSlot(p, imgs[0], labels[0])}</div>
         ${mediaSlot(p.id, imgs[1], labels[1])}
         ${mediaSlot(p.id, imgs[2], labels[2])}
         ${imgs[3] ? mediaSlot(p.id, imgs[3], labels[3]) : ''}
@@ -903,6 +1125,7 @@ async function loadPhotographer() {
 renderDirectorList();
 renderDecks();
 setLang('es');
+updatePageBackground('home');
 </script>
 </body>
 </html>
