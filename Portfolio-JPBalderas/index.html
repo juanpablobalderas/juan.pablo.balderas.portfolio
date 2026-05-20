@@ -1044,6 +1044,11 @@ function openDirector(id) {
         ${mediaSlot(p.id, imgs[2], labels[2])}
         ${mediaSlot(p.id, imgs[3], labels[3])}
       </div>`;
+} else if (p.layout === 'solo') {
+    mediaHtml = `
+      <div class="${base}">
+        <div class="media-hero">${heroSlot(p, imgs[0] || '', labels[0] || '')}</div>
+      </div>`;
   } else {
     mediaHtml = `
       <div class="${base}">
@@ -1053,7 +1058,6 @@ function openDirector(id) {
         ${imgs[3] ? mediaSlot(p.id, imgs[3], labels[3]) : ''}
       </div>`;
   }
-
   const bodyHtml = p.body[LANG.current].map(par => `<p>${par}</p>`).join('');
 
   document.getElementById('director-detail-content').innerHTML = `
